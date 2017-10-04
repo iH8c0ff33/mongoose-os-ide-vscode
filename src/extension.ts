@@ -27,20 +27,21 @@ class MongooseOSExtension {
 
       const sources = execSync("mos -X eval-manifest-expr sources", { cwd: workspace.rootPath })
       const mosRepoPath = execSync("mos -X get-mos-repo-dir", { cwd: workspace.rootPath })
+      const gccIncludePaths = execSync("gcc -E -Wp,-v -xc /dev/null", { stdio: [2] })
       console.log(sources.toString())
       console.log(mosRepoPath.toString())
+      console.log(gccIncludePaths.toString())
 
       this.genCppProperties(JSON.parse(sources.toString()), mosRepoPath.toString().replace(/\n/g, ""))
     }))
   }
 
   genCppProperties(sources: String[], mosRepoPath: String) {
-    sources.map(i => i.startsWith("/") ? i : `\${workspaceRoot}/${i}`)
+    sources = sources.map(i => i.startsWith("/") ? i : `${workspace.rootPath}/${i}`)
 
     sources.push(
       `${mosRepoPath}/fw/src`,
       mosRepoPath,
-      "/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include",
       "${workspaceRoot}/build/gen"
     )
 
