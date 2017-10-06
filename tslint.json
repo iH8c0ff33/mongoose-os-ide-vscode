@@ -1,0 +1,19 @@
+{
+  "extends": "tslint-config-standard",
+  "rules": {
+    "quotemark": [
+      true,
+      "double"
+    ],
+    "space-before-function-paren": false,
+    "curly": [
+      false,
+      "as-needed"
+    ],
+    "no-trailing-whitespace": [
+      true,
+      "ignore-jsdoc"
+    ],
+    "ordered-imports": true
+  }
+}

@@ -6,18 +6,6 @@ export class Logger {
   constructor(private _writer: (text: string) => void,
     private _prefix?: string) { }
 
-  private _append(text: string) {
-    if (this._lineStart) {
-      if (this._indentLevel > 0) {
-        this._writer(" ".repeat(this._indentLevel * this._tabSize))
-      }
-
-      this._lineStart = false
-    }
-
-    this._writer(this._prefix ? `${this._prefix}: ${text}` : text)
-  }
-
   public indentMore(value: number = 1) {
     this._indentLevel += value
   }
@@ -35,5 +23,17 @@ export class Logger {
   public appendLine(text?: string) {
     this._append(text + "\n")
     this._lineStart = true
+  }
+
+  private _append(text: string) {
+    if (this._lineStart) {
+      if (this._indentLevel > 0) {
+        this._writer(" ".repeat(this._indentLevel * this._tabSize))
+      }
+
+      this._lineStart = false
+    }
+
+    this._writer(this._prefix ? `${this._prefix}: ${text}` : text)
   }
 }

@@ -1,7 +1,9 @@
 import { stat } from "fs"
-import { resolve } from "path"
+import { join, resolve } from "path"
 import { file as createTmpFile, SynchrounousResult } from "tmp"
-import { StatusBarItem as VscodeStatusBarItem, StatusBarAlignment } from "vscode"
+import { StatusBarItem as VscodeStatusBarItem } from "vscode"
+
+import { Package } from "./package"
 
 // Extension path
 
@@ -21,10 +23,10 @@ export function getExtensionPath(): string {
 // Files
 
 export function checkFile(path: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     stat(path, (error, stats) => {
       if (error)
-        reject(error)
+        resolve(false)
       if (stats && stats.isFile)
         resolve(true)
       else
@@ -80,4 +82,22 @@ export class StatusBarItem {
     this._statusBarItem.tooltip = text
     this._statusBarItem.show()
   }
+}
+
+// Package utilities
+
+export async function checkTestFile(pkg: Package) {
+  const testFile = getAbsTestFilePath(pkg)
+  if (testFile)
+    return checkFile(testFile)
+  else
+    return false
+}
+
+export function getAbsTestFilePath(pkg: Package) {
+  return pkg.testFile ? join(getAbsInstallPath(pkg), pkg.testFile) : undefined
+}
+
+export function getAbsInstallPath(pkg: Package) {
+  return pkg.installPath ? join(getExtensionPath(), pkg.installPath) : getExtensionPath()
 }

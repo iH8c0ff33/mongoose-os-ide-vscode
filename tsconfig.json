@@ -8,7 +8,10 @@
         ],
         "sourceMap": true,
         "rootDir": ".",
-        "strict": true
+        "strict": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": true,
+        "allowUnusedLabels": false
     },
     "exclude": [
         "node_modules",
