@@ -13,7 +13,7 @@ import { Logger } from "./logger"
 import { parsePlatform, Platform } from "./platform"
 import {
   checkTestFile, createTempFile, getAbsInstallPath, getAbsTestFilePath,
-  StatusBarItem
+  StatusBarItem, touchInstallLockFile
 } from "./util"
 
 /**
@@ -181,7 +181,9 @@ export class PackageManager {
       // delete temporary file
       if (pkg.tmpFile)
         pkg.tmpFile.removeCallback()
-    })
+
+      return parsePlatform(pkg.platform)
+    }).then(platform => touchInstallLockFile(platform))
   }
 
   /**
@@ -273,10 +275,13 @@ export class PackageManager {
     const packages = await this.selectPackages()
     await Promise.all(packages.map(async it => {
       // check if the dep is already installed
-      if (!await checkTestFile(it))
+      if (!await checkTestFile(it)) {
         return PackageManager.downloadPackage(it, this.logger)
-      else
+      } else {
+        touchInstallLockFile(await parsePlatform(it.platform))
+
         this.logger.appendLine(`skip package "${it.name}"`)
+      }
     }))
   }
 
@@ -301,7 +306,7 @@ export class PackageManager {
   private async selectPackages() {
     const packages = await this.parsePackages()
     return packages.filter(async pkg =>
-      await parsePlatform(pkg.platform) === this.platform)
+      this.platform === Platform.none || await parsePlatform(pkg.platform) === this.platform)
   }
 
   /**

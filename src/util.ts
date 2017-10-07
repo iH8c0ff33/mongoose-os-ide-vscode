@@ -5,6 +5,7 @@ import { StatusBarItem as VscodeStatusBarItem } from "vscode"
 
 import { unlink, writeFile } from "./fs"
 import { Package } from "./package"
+import { Platform, Platforms } from "./platform"
 
 // Extension path
 
@@ -81,19 +82,14 @@ export function createTempFile(prefix?: string): Promise<SynchrounousResult> {
 
 // Install lockfiles
 
-export enum InstallLockfile {
-  Running,
-  Lock
-}
-
 /**
  * Get the lockfile path
  * 
  * @param {InstallLockfile} type 
  * @returns {string} 
  */
-function getInstallLockfilePath(type: InstallLockfile): string {
-  const lockfileName = `install.${InstallLockfile[type]}`
+function getInstallLockfilePath(platform: Platform): string {
+  const lockfileName = `install.${Platform[platform]}`
   return resolve(getExtensionPath(), lockfileName)
 }
 
@@ -104,8 +100,11 @@ function getInstallLockfilePath(type: InstallLockfile): string {
  * @param {InstallLockfile} type 
  * @returns 
  */
-export async function checkInstallLockfile(type: InstallLockfile) {
-  return checkFile(getInstallLockfilePath(type))
+export async function checkInstallLockfile(platform: Platform): Promise<boolean> {
+  if (platform === Platform.none)
+    return (await Promise.all<boolean>(Platforms.map(it => checkInstallLockfile(it))))
+      .reduce((previous, current) => previous && current)
+  return checkFile(getInstallLockfilePath(platform))
 }
 
 /**
@@ -115,8 +114,8 @@ export async function checkInstallLockfile(type: InstallLockfile) {
  * @param {InstallLockfile} type 
  * @returns 
  */
-export async function touchInstallLockFile(type: InstallLockfile) {
-  return writeFile(getInstallLockfilePath(type), "")
+export async function touchInstallLockFile(platform: Platform) {
+  return writeFile(getInstallLockfilePath(platform), "")
 }
 
 /**
@@ -126,7 +125,7 @@ export async function touchInstallLockFile(type: InstallLockfile) {
  * @param {InstallLockfile} type 
  * @returns 
  */
-export async function removeInstallLockFile(type: InstallLockfile) {
+export async function removeInstallLockFile(type: Platform) {
   return unlink(getInstallLockfilePath(type))
 }
 

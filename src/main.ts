@@ -1,17 +1,18 @@
+import { join } from "path"
 import {
   commands, ExtensionContext, extensions, OutputChannel, StatusBarAlignment,
   window, workspace
 } from "vscode"
 
-import { writeFile } from "./fs"
+import { lstat, mkdir, readdir, writeFile } from "./fs"
 import { getGccSearchPath } from "./gcc"
 import genCppConfig from "./generator"
 import { Logger } from "./logger"
 import { getMosIncludes, getMosModulePath, getMosPlatform } from "./mos"
 import { PackageManager } from "./package"
-import { parsePlatform } from "./platform"
+import { parsePlatform, Platform } from "./platform"
 import {
-  checkFile, checkInstallLockfile, InstallLockfile, setExtensionPath,
+  checkFile, checkInstallLockfile, setExtensionPath,
   StatusBarItem, touchInstallLockFile
 } from "./util"
 
@@ -66,17 +67,15 @@ function registerCommands(context: ExtensionContext, logger: Logger) {
  * @param {Logger} logger 
  */
 async function checkDependencies(packageJSON: any, logger: Logger) {
-  if (!await checkInstallLockfile(InstallLockfile.Lock)) {
-    const platform = await parsePlatform(await getMosPlatform())
+  const platform = await parsePlatform(await getMosPlatform())
 
+  if (!await checkInstallLockfile(platform)) {
     const statusBar = new StatusBarItem(window.createStatusBarItem(StatusBarAlignment.Right))
 
     const packageManager = new PackageManager(packageJSON, platform, logger, statusBar)
 
     await packageManager.downloadPackages()
     await packageManager.installPackages()
-
-    await touchInstallLockFile(InstallLockfile.Lock)
 
     statusBar.dispose()
     return
@@ -91,6 +90,13 @@ async function checkDependencies(packageJSON: any, logger: Logger) {
  * @returns {boolean} true if there's a cpp config in the workspace
  */
 async function checkCppConfig() {
+  if (!workspace.rootPath)
+    throw new Error("workspace has no opened folder")
+
+  if ((await readdir(workspace.rootPath)).indexOf(".vscode") === -1) {
+    await mkdir(join(workspace.rootPath, ".vscode"))
+  }
+
   return checkFile(`${workspace.rootPath}/.vscode/c_cpp_properties.json`)
 }
 
