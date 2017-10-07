@@ -1,11 +1,16 @@
-import { ExtensionContext, extensions, OutputChannel, window } from "vscode"
+import {
+  ExtensionContext, extensions, OutputChannel, StatusBarAlignment, window
+} from "vscode"
 
 import { Logger } from "./logger"
-import { checkInstallLockfile, InstallLockfile, setExtensionPath } from "./util"
+import { getMosPlatform } from "./mos"
+import { PackageManager } from "./package"
+import { parsePlatform } from "./platform"
+import { checkInstallLockfile, InstallLockfile, setExtensionPath, StatusBarItem, touchInstallLockFile } from "./util"
 
 let _channel: OutputChannel
 
-export function activate(_context: ExtensionContext) {
+export async function activate(_context: ExtensionContext) {
 
   const extensionId = "ih8c0ff33.mongoose-os-ide"
   const extension = extensions.getExtension(extensionId)
@@ -17,20 +22,32 @@ export function activate(_context: ExtensionContext) {
 
   _channel = window.createOutputChannel("mos")
 
-  const logger = new Logger(_channel.append)
+  const logger = new Logger(text => _channel.append(text))
 
   logger.appendLine(`activating mos ide version: ${extensionVersion}`)
+
+  logger.appendLine(`PATH: ${process.env["PATH"]}`)
+  logger.appendLine(`platform is ${await getMosPlatform()}`)
+
+  await checkDependencies(extension.packageJSON, logger)
 }
 
-function checkDependencies(): Promise<boolean> {
-  return checkInstallLockfile(InstallLockfile.Lock).then(installed => {
-    if (!installed) {
-      // TODO: Install...
-      return true
-    } else {
-      return true
-    }
-  })
-}
+async function checkDependencies(packageJSON: any, logger: Logger) {
+  if (!await checkInstallLockfile(InstallLockfile.Lock)) {
+    const platform = await parsePlatform(await getMosPlatform())
 
-// function installDependencies() { }
+    const statusBar = new StatusBarItem(window.createStatusBarItem(StatusBarAlignment.Right))
+
+    const packageManager = new PackageManager(packageJSON, platform, logger, statusBar)
+
+    await packageManager.downloadPackages()
+    await packageManager.installPackages()
+
+    await touchInstallLockFile(InstallLockfile.Lock)
+
+    statusBar.dispose()
+    return true
+  } else {
+    return true
+  }
+}

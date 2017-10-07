@@ -4,12 +4,11 @@ export enum Platform {
 }
 
 export async function parsePlatform(platformString: string) {
-  switch (platformString) {
-    case "esp8266":
-      return Platform.esp8266
-    case "esp32":
-      return Platform.esp32
-    default:
-      throw new Error("Failed to parse platform")
+  if (platformString.indexOf("esp8266") !== -1) {
+    return Platform.esp8266
+  } else if (platformString.indexOf("esp32") !== -1) {
+    return Platform.esp32
+  } else {
+    throw new Error("Failed to parse platform")
   }
 }

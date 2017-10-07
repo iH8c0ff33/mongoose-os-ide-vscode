@@ -8,7 +8,7 @@ import { Platform } from "../src/platform"
 import { setExtensionPath, StatusBarItem } from "../src/util"
 
 const packageJSON = {
-  extensionDependencies: [
+  ideDeps: [
     {
       name: "test_file",
       description: "An useless file",
@@ -47,7 +47,7 @@ describe("PackageManager", () => {
   }).timeout(30 * 1000)
 
   after(async () => {
-    await Promise.all(packageJSON.extensionDependencies.map(it => {
+    await Promise.all(packageJSON.ideDeps.map(it => {
       return rmrf(normalize(join(__dirname, "..", "..", it.installPath)))
     }))
   })

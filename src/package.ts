@@ -1,5 +1,8 @@
 import { createWriteStream, unlink } from "fs"
-import { request, RequestOptions } from "http"
+import { request as httpRequest, RequestOptions } from "http"
+import {
+  request as httpsRequest, RequestOptions as HttpsRequestOptions
+} from "https"
 import * as mkdirp from "mkdirp"
 import { resolve as resolvePath } from "path"
 import { SynchrounousResult } from "tmp"
@@ -77,25 +80,23 @@ export class PackageManager {
    * @memberof PackageManager
    */
   private static async downloadPackage(pkg: Package, logger: Logger): Promise<void> {
-    logger.appendLine(`Started downloading "${pkg.name}: ${pkg.description}`)
+    logger.appendLine(`Started downloading "${pkg.name}": ${pkg.description}`)
 
     const tmpFile = await createTempFile("package-")
     pkg.tmpFile = tmpFile
 
     const result = await PackageManager.downloadFile(pkg.url, pkg, logger)
 
-    logger.appendLine(`Finished downloading "${pkg.name}`)
-
-    return result
+    logger.appendLine(`Finished downloading "${pkg.name}"`)
   }
 
   private static installPackage(pkg: Package, logger: Logger, statusBar: StatusBarItem): Promise<void> {
     if (!pkg.tmpFile) {
-      logger.appendLine(`skipping package: ${pkg.name}`)
+      logger.appendLine(`skipping package: "${pkg.name}"`)
       return Promise.resolve()
     }
 
-    logger.appendLine(`installing package: ${pkg.name}`)
+    logger.appendLine(`installing package: "${pkg.name}"`)
 
     statusBar.text = "$(desktop-download) Installing packages..."
     statusBar.tooltip = `installing package: ${pkg.name}`
@@ -182,13 +183,13 @@ export class PackageManager {
 
     const url = parseUrl(urlString)
 
-    const options: RequestOptions = {
-      host: url.host,
-      path: url.path
+    let request = httpRequest
+    if (url.protocol === "https:") {
+      request = httpsRequest
     }
 
     return new Promise((resolve, reject) => {
-      const req = request(options, response => {
+      const req = request(urlString, response => {
         // Error handling
         if (response.statusCode === 301 || response.statusCode === 302) {
           return resolve(PackageManager.downloadFile(response.headers["location"] as string, pkg, logger))
@@ -205,7 +206,8 @@ export class PackageManager {
         let lastProgress = new Date()
 
         if (!pkg.tmpFile)
-          throw new PackageError("Temporary file not found!", pkg)
+          return reject(new PackageError("Temporary file not found!", pkg))
+
         let tmpFile = createWriteStream("", { fd: pkg.tmpFile.fd })
 
         // Handlers
@@ -225,7 +227,7 @@ export class PackageManager {
         })
 
         response.on("end", () => {
-          console.log("end")
+          logger.appendLine(`downloaded: "${pkg.name}"`)
           resolve()
         })
 
@@ -261,6 +263,7 @@ export class PackageManager {
   public async installPackages() {
     const packages = await this.selectPackages()
     await Promise.all(packages.map(it => PackageManager.installPackage(it, this.logger, this.statusBar)))
+    this.logger.appendLine("installation completed")
   }
 
   /**
@@ -286,8 +289,8 @@ export class PackageManager {
   private async parsePackages() {
     if (this.packages)
       return (this.packages)
-    else if (this.packageJSON.extensionDependencies) {
-      this.packages = this.packageJSON.extensionDependencies as Package[]
+    else if (this.packageJSON.ideDeps) {
+      this.packages = this.packageJSON.ideDeps as Package[]
       return this.packages
     } else
       throw new PackageError("Failed to parse manifest")

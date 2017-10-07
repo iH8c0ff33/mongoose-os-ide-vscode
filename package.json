@@ -11,9 +11,10 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:mongoose-os-ide.testCommand"
+        "onCommand:mongoose-os-ide.testCommand",
+        "workspaceContains:**/mos.yml"
     ],
-    "main": "./out/src/extension",
+    "main": "./out/src/main",
     "contributes": {
         "commands": [
             {
@@ -37,11 +38,21 @@
         "tslint": "^5.7.0",
         "tslint-config-standard": "^6.0.1",
         "typescript": "^2.5.3",
-        "vscode": "^1.0.0"
+        "vscode": "^1.1.5"
     },
     "dependencies": {
         "mkdirp": "^0.5.1",
         "tmp": "^0.0.33",
         "yauzl": "^2.8.0"
-    }
+    },
+    "ideDeps": [
+        {
+            "name": "esp8266_headers",
+            "description": "Headers for esp8266 toolchain and stdlib",
+            "url": "https://github.com/iH8c0ff33/mongoose-os-ide-vscode/releases/download/v0.0.1-alpha.1/headers_esp8266_v0.0.1-alpha.1.zip",
+            "platform": "esp8266",
+            "installPath": ".esp8266",
+            "testFile": "include/stdlib.h"
+        }
+    ]
 }

@@ -1,2 +1,5 @@
 out
 node_modules
+.esp8266
+.esp32
+Install.*

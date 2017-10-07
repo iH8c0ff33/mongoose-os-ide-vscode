@@ -3,6 +3,7 @@ import { join, resolve } from "path"
 import { file as createTmpFile, SynchrounousResult } from "tmp"
 import { StatusBarItem as VscodeStatusBarItem } from "vscode"
 
+import { unlink, writeFile } from "./fs"
 import { Package } from "./package"
 
 // Extension path
@@ -64,8 +65,16 @@ function getInstallLockfilePath(type: InstallLockfile): string {
   return resolve(getExtensionPath(), lockfileName)
 }
 
-export function checkInstallLockfile(type: InstallLockfile): Promise<boolean> {
+export async function checkInstallLockfile(type: InstallLockfile) {
   return checkFile(getInstallLockfilePath(type))
+}
+
+export async function touchInstallLockFile(type: InstallLockfile) {
+  return writeFile(getInstallLockfilePath(type), "")
+}
+
+export async function removeInstallLockFile(type: InstallLockfile) {
+  return unlink(getInstallLockfilePath(type))
 }
 
 // Visual Studio Code's statusBar item
@@ -81,6 +90,10 @@ export class StatusBarItem {
   set tooltip(text: string) {
     this._statusBarItem.tooltip = text
     this._statusBarItem.show()
+  }
+
+  public dispose(): void {
+    return this._statusBarItem.dispose()
   }
 }
 
