@@ -1,35 +1,37 @@
-# mongoose-os-ide README
+# mongoose-os-ide
 
-This is the README for your extension "mongoose-os-ide". After writing up a brief description, we recommend including the following sections.
+such extension,
+much vscode,
+dang.
+plz dowload
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+It provides awesome completion using C/C++ extension from Microsoft. The config
+for cpp include paths is done automatically.
 
-For example if there is an image subfolder under your extension project workspace:
+![Completion](https://i.imgur.com/G1OkJv0.png)
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+> Tip: if you already have a c_cpp_properties.json file you need to generate a
+> new one with the command (`mos-ide: Generate Mongoose-OS cpp config`)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+* gcc: to get default include path for your OS
+* [mos](https://mongoose-os.com/software.html): mongoose-os tool
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+> Warning: remember to use _"latest"_ mos version (ie: run `mos update latest`)
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Windows doesn't work sometimes and work needs to be done by the user
+
+## Credits
+
+[Mongoose OS](https://mongoose-os.com/) - The mongoose operating system
+
+[Microsoft Corporation](https://microsoft.com) - yauzl definition fot typescript
+> Note: see LICENSE file in `typings/yauzl` folder
 
 ## Release Notes
 
@@ -37,12 +39,20 @@ Users appreciate release notes as you update your extension.
 
 ### 1.0.0
 
-Initial release of ...
+Initial release of Mongoose OS IDE
 
-### 1.0.1
+## License
 
-Fixed issue #.
+Copyright 2017 Daniele Monteleone
 
-### 1.1.0
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Added features X, Y, and Z.
+[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
