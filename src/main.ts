@@ -1,12 +1,19 @@
 import {
-  ExtensionContext, extensions, OutputChannel, StatusBarAlignment, window
+  ExtensionContext, extensions, OutputChannel, StatusBarAlignment, window,
+  workspace
 } from "vscode"
 
+import { writeFile } from "./fs"
+import { getGccSearchPath } from "./gcc"
+import genCppConfig from "./generator"
 import { Logger } from "./logger"
-import { getMosPlatform } from "./mos"
+import { getMosIncludes, getMosModulePath, getMosPlatform } from "./mos"
 import { PackageManager } from "./package"
 import { parsePlatform } from "./platform"
-import { checkInstallLockfile, InstallLockfile, setExtensionPath, StatusBarItem, touchInstallLockFile } from "./util"
+import {
+  checkFile, checkInstallLockfile, InstallLockfile, setExtensionPath,
+  StatusBarItem, touchInstallLockFile
+} from "./util"
 
 let _channel: OutputChannel
 
@@ -30,6 +37,10 @@ export async function activate(_context: ExtensionContext) {
   logger.appendLine(`platform is ${await getMosPlatform()}`)
 
   await checkDependencies(extension.packageJSON, logger)
+  if (!await checkCppConfig())
+    await createCppConfig(logger)
+  else
+    logger.appendLine("skip config generation")
 }
 
 async function checkDependencies(packageJSON: any, logger: Logger) {
@@ -50,4 +61,21 @@ async function checkDependencies(packageJSON: any, logger: Logger) {
   } else {
     return true
   }
+}
+
+async function checkCppConfig() {
+  return checkFile(`${workspace.rootPath}/.vscode/c_cpp_properties.json`)
+}
+
+async function createCppConfig(logger: Logger) {
+  let includes = await getMosIncludes()
+  includes = includes.concat(await getGccSearchPath())
+  includes.push(await getMosModulePath())
+
+  logger.appendLine(`includes: ${includes}`)
+
+  const config = await genCppConfig(includes)
+
+  await writeFile(`${workspace.rootPath} /.vscode / c_cpp_properties.json`, JSON.stringify(config))
+  logger.appendLine("wrote cpp config")
 }
