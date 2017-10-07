@@ -1,6 +1,7 @@
-import { workspace } from "vscode"
 import { homedir } from "os"
 import { join } from "path"
+import { workspace } from "vscode"
+
 import { exec } from "./process"
 
 const MOS = join(homedir(),".mos", "bin", "mos")
