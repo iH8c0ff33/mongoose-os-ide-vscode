@@ -90,6 +90,17 @@ export class PackageManager {
     logger.appendLine(`Finished downloading "${pkg.name}"`)
   }
 
+  /**
+   * Install a package (extracts tmp zip file to installPath)
+   * 
+   * @private
+   * @static
+   * @param {Package} pkg package to install 
+   * @param {Logger} logger 
+   * @param {StatusBarItem} statusBar used for notifications
+   * @returns {Promise<void>} 
+   * @memberof PackageManager
+   */
   private static installPackage(pkg: Package, logger: Logger, statusBar: StatusBarItem): Promise<void> {
     if (!pkg.tmpFile) {
       logger.appendLine(`skipping package: "${pkg.name}"`)
@@ -102,6 +113,7 @@ export class PackageManager {
     statusBar.tooltip = `installing package: ${pkg.name}`
 
     return new Promise<void>((resolve, rejectPromise) => {
+      // replace reject function with one that deletes the temporary file before rejecting
       const reject = (error?: any) => {
         const testFilePath = getAbsTestFilePath(pkg)
 
@@ -120,20 +132,26 @@ export class PackageManager {
       if (!pkg.tmpFile || pkg.tmpFile.fd === 0)
         return reject(new PackageError("tmpfile is not there", pkg))
 
+      // parse zip file
       fromFd(pkg.tmpFile.fd, { lazyEntries: true }, (error, zipFile) => {
+
+        // TODO: that error happens too many times without any reason
         if (error || !zipFile)
           return reject(new PackageError("couldn't open tmp zipfile", pkg, error))
 
+        // create install path for package
         mkdirp(getAbsInstallPath(pkg), { mode: 0o755 }, error => {
           if (error)
             return reject(new PackageError("couldn't create install path", pkg, error))
 
+          // start reading the first entry in the zip file
           zipFile.readEntry()
         })
 
         zipFile.on("entry", (entry: Entry) => {
           const entryPath = resolvePath(getAbsInstallPath(pkg), entry.fileName)
 
+          // if it's a folder create it
           if (entry.fileName.endsWith("/")) {
             mkdirp(entryPath, { mode: 0o755 }, error => {
               if (error)
@@ -142,6 +160,7 @@ export class PackageManager {
               zipFile.readEntry()
             })
           } else {
+            // extract the file from zip and read the next entry
             zipFile.openReadStream(entry, (error, readStream) => {
               if (error || !readStream)
                 return reject(new PackageError("error opening read stream", pkg, error))
@@ -159,6 +178,7 @@ export class PackageManager {
         zipFile.on("error", (error: any) => reject(new PackageError(`zip error: ${error.code}`, pkg, error)))
       })
     }).then(() => {
+      // delete temporary file
       if (pkg.tmpFile)
         pkg.tmpFile.removeCallback()
     })
@@ -183,6 +203,7 @@ export class PackageManager {
 
     const url = parseUrl(urlString)
 
+    // we need to use https module instead of http to make https requests
     let request = httpRequest
     if (url.protocol === "https:") {
       request = httpsRequest
@@ -216,7 +237,7 @@ export class PackageManager {
 
           let newPercentage = Math.ceil(100 * (downloaded / downloadSize))
 
-          // Display percentage is changed > 20%
+          // Display percentage if changed > 20%
           if (newPercentage - percentage > 20) {
             const now = new Date()
             const speed = (newPercentage - percentage) * downloadSize / (now.getTime() / 1000 - lastProgress.getTime() / 1000)
@@ -236,10 +257,8 @@ export class PackageManager {
         })
 
         response.pipe(tmpWriteStream, { end: false })
-
-        // Start the download
       })
-
+      // start the download (end the request)
       req.end()
     })
   }
@@ -253,6 +272,7 @@ export class PackageManager {
   public async downloadPackages() {
     const packages = await this.selectPackages()
     await Promise.all(packages.map(async it => {
+      // check if the dep is already installed
       if (!await checkTestFile(it))
         return PackageManager.downloadPackage(it, this.logger)
       else
@@ -260,6 +280,11 @@ export class PackageManager {
     }))
   }
 
+  /**
+   * Install all packages
+   * 
+   * @memberof PackageManager
+   */
   public async installPackages() {
     const packages = await this.selectPackages()
     await Promise.all(packages.map(it => PackageManager.installPackage(it, this.logger, this.statusBar)))

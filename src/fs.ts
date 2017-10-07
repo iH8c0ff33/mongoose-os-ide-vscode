@@ -1,3 +1,4 @@
+// fs functions, promisified
 import {
   exists as fsExists, lstat as fsLstat, PathLike, readdir as fsReaddir,
   rmdir as fsRmdir, Stats, unlink as fsUnlink, writeFile as fsWriteFile

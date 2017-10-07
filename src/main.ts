@@ -40,18 +40,31 @@ export async function activate(_context: ExtensionContext) {
   logger.appendLine(`platform is ${await getMosPlatform()}`)
 
   await checkDependencies(extension.packageJSON, logger)
+
   if (!await checkCppConfig())
     await createCppConfig(logger)
   else
     logger.appendLine("skip config generation")
 }
 
+/**
+ * Register all extension commands
+ * 
+ * @param {ExtensionContext} context 
+ * @param {Logger} logger 
+ */
 function registerCommands(context: ExtensionContext, logger: Logger) {
   context.subscriptions.push(commands.registerCommand(`${extensionName}.genConfig`, async () =>
     createCppConfig(logger)
   ))
 }
 
+/**
+ * Check and install dependencies
+ * 
+ * @param {*} packageJSON package.json
+ * @param {Logger} logger 
+ */
 async function checkDependencies(packageJSON: any, logger: Logger) {
   if (!await checkInstallLockfile(InstallLockfile.Lock)) {
     const platform = await parsePlatform(await getMosPlatform())
@@ -66,16 +79,26 @@ async function checkDependencies(packageJSON: any, logger: Logger) {
     await touchInstallLockFile(InstallLockfile.Lock)
 
     statusBar.dispose()
-    return true
+    return
   } else {
-    return true
+    return
   }
 }
 
+/**
+ * Checks whether the cpp config is present or not
+ * 
+ * @returns {boolean} true if there's a cpp config in the workspace
+ */
 async function checkCppConfig() {
   return checkFile(`${workspace.rootPath}/.vscode/c_cpp_properties.json`)
 }
 
+/**
+ * Generates a cpp config and writes it to the workspace
+ * 
+ * @param {Logger} logger 
+ */
 async function createCppConfig(logger: Logger) {
   let includes = await getMosIncludes()
   includes = includes.concat(await getGccSearchPath())

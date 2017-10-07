@@ -1,8 +1,20 @@
+/**
+ * Generic logger
+ * 
+ * @export
+ * @class Logger
+ */
 export class Logger {
   private _indentLevel = 0
   private _tabSize = 2
   private _lineStart = false
 
+  /**
+   * Creates an instance of Logger.
+   * @param {(text: string) => void} _writer output writer
+   * @param {string} [_prefix] 
+   * @memberof Logger
+   */
   constructor(private _writer: (text: string) => void,
     private _prefix?: string) { }
 

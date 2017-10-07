@@ -15,6 +15,13 @@ const template = {
   version: 2
 }
 
+/**
+ * Generate config file for c-cpp vscode's extension
+ * 
+ * @export
+ * @param {string[]} includes includePath and browse.path
+ * @returns cpp config
+ */
 export default async function genCppConfig(includes: string[]) {
   let config = template
   config.configurations.map(it => {

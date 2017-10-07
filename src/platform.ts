@@ -3,6 +3,13 @@ export enum Platform {
   esp32
 }
 
+/**
+ * Get platform from its string representation
+ * 
+ * @export
+ * @param {string} platformString 
+ * @returns {Platform} platform
+ */
 export async function parsePlatform(platformString: string) {
   if (platformString.indexOf("esp8266") !== -1) {
     return Platform.esp8266
