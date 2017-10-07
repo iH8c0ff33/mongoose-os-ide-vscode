@@ -1,4 +1,4 @@
-import { loginExec } from "./process"
+import { exec } from "./process"
 
 /**
  * Get output of a verbose gcc compilation (useful for search paths)
@@ -6,7 +6,7 @@ import { loginExec } from "./process"
  * @returns {string} gcc output
  */
 async function verboseGcc() {
-  const { stderr } = await loginExec("gcc -v -x c -E /dev/null")
+  const { stderr } = await exec("gcc -v -x c -E /dev/null")
 
   return stderr
 }

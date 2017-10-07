@@ -56,7 +56,7 @@ export async function activate(_context: ExtensionContext) {
  */
 function registerCommands(context: ExtensionContext, logger: Logger) {
   context.subscriptions.push(commands.registerCommand(`${extensionName}.genConfig`, async () =>
-    createCppConfig(logger)
+    await createCppConfig(logger)
   ))
 }
 

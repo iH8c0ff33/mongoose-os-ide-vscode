@@ -1,7 +1,9 @@
 import { workspace } from "vscode"
+import { homedir } from "os"
+import { join } from "path"
 import { exec } from "./process"
 
-const MOS = `${process.env.HOME || "~"}/.mos/bin/mos`
+const MOS = join(homedir(),".mos", "bin", "mos")
 
 /**
  * Get the mos platform used in the workspace
