@@ -1,6 +1,6 @@
 import {
-  ExtensionContext, extensions, OutputChannel, StatusBarAlignment, window,
-  workspace
+  commands, ExtensionContext, extensions, OutputChannel, StatusBarAlignment,
+  window, workspace
 } from "vscode"
 
 import { writeFile } from "./fs"
@@ -16,6 +16,7 @@ import {
 } from "./util"
 
 let _channel: OutputChannel
+const extensionName = "mongoose-os-ide"
 
 export async function activate(_context: ExtensionContext) {
 
@@ -33,6 +34,8 @@ export async function activate(_context: ExtensionContext) {
 
   logger.appendLine(`activating mos ide version: ${extensionVersion}`)
 
+  registerCommands(_context, logger)
+
   logger.appendLine(`PATH: ${process.env["PATH"]}`)
   logger.appendLine(`platform is ${await getMosPlatform()}`)
 
@@ -41,6 +44,12 @@ export async function activate(_context: ExtensionContext) {
     await createCppConfig(logger)
   else
     logger.appendLine("skip config generation")
+}
+
+function registerCommands(context: ExtensionContext, logger: Logger) {
+  context.subscriptions.push(commands.registerCommand(`${extensionName}.genConfig`, async () =>
+    createCppConfig(logger)
+  ))
 }
 
 async function checkDependencies(packageJSON: any, logger: Logger) {
@@ -76,6 +85,6 @@ async function createCppConfig(logger: Logger) {
 
   const config = await genCppConfig(includes)
 
-  await writeFile(`${workspace.rootPath} /.vscode / c_cpp_properties.json`, JSON.stringify(config))
+  await writeFile(`${workspace.rootPath}/.vscode/c_cpp_properties.json`, JSON.stringify(config))
   logger.appendLine("wrote cpp config")
 }

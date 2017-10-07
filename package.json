@@ -2,7 +2,7 @@
     "name": "mongoose-os-ide",
     "displayName": "Mongoose OS IDE",
     "description": "Mongoose OS IDE for Visual Studio Code",
-    "version": "0.0.1",
+    "version": "0.4.0",
     "publisher": "ih8c0ff33",
     "engines": {
         "vscode": "^1.15.0"
@@ -11,15 +11,15 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:mongoose-os-ide.testCommand",
+        "onCommand:mongoose-os-ide.genConfig",
         "workspaceContains:**/mos.yml"
     ],
     "main": "./out/src/main",
     "contributes": {
         "commands": [
             {
-                "command": "mongoose-os-ide.testCommand",
-                "title": "Hello World"
+                "command": "mongoose-os-ide.genConfig",
+                "title": "mos-ide: Generate Mongoose-OS cpp config"
             }
         ]
     },
