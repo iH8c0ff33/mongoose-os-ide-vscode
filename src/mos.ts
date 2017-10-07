@@ -1,5 +1,5 @@
 import { workspace } from "vscode"
-import { loginExec } from "./process"
+import { exec } from "./process"
 
 const MOS = `${process.env.HOME || "~"}/.mos/bin/mos`
 
@@ -10,7 +10,7 @@ const MOS = `${process.env.HOME || "~"}/.mos/bin/mos`
  * @returns {string} mos platform
  */
 export async function getMosPlatform() {
-  const { stdout } = await loginExec(`${MOS} -X eval-manifest-expr platform`, { cwd: workspace.rootPath })
+  const { stdout } = await exec(`${MOS} -X eval-manifest-expr platform`, { cwd: workspace.rootPath })
 
   return stdout
 }
@@ -22,7 +22,7 @@ export async function getMosPlatform() {
  * @returns {string} path of the cloned mongoose-os repo
  */
 export async function getMosModulePath() {
-  const { stdout } = await loginExec(`${MOS} -X get-mos-repo-dir`, { cwd: workspace.rootPath })
+  const { stdout } = await exec(`${MOS} -X get-mos-repo-dir`, { cwd: workspace.rootPath })
   const [match] = stdout.match(/^((?:\/[^/\0 \n]+)+)/) || [null]
   if (!match)
     throw new Error("failed to get mos repo dir")
@@ -36,7 +36,7 @@ export async function getMosModulePath() {
  * @returns {string[]} include path
  */
 export async function getMosIncludes() {
-  const { stdout } = await loginExec(`${MOS} -X eval-manifest-expr includes`, { cwd: workspace.rootPath })
+  const { stdout } = await exec(`${MOS} -X eval-manifest-expr includes`, { cwd: workspace.rootPath })
 
   return JSON.parse(stdout) as string[]
 }
