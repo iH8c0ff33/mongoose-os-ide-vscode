@@ -2,7 +2,7 @@
     "name": "mongoose-os-ide",
     "displayName": "Mongoose OS IDE",
     "description": "Mongoose OS IDE for Visual Studio Code",
-    "version": "1.0.0-alpha",
+    "version": "1.0.0",
     "publisher": "ih8c0ff33",
     "engines": {
         "vscode": "^1.15.0"
