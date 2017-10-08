@@ -3,7 +3,7 @@ All notable changes to the "mongoose-os-ide" extension will be documented in thi
 
 ## [Unreleased]
 
-## [1.0.0] - 2017-09-07
+## [1.0.0-alpha] - 2017-09-07
 ### Added
 - First release
 - `c_cpp_properties.json` generation

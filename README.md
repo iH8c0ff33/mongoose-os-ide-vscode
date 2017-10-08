@@ -37,7 +37,7 @@ Windows doesn't work sometimes and work needs to be done by the user
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+### 1.0.0-alpha
 
 Initial release of Mongoose OS IDE
 
